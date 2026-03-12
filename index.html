@@ -3,450 +3,445 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌾 เปรียบเทียบความคุ้มค่าพืชไร่ | Crop Profit Calculator</title>
+    <title>เครื่องคำนวณความคุ้มค่าพืชไร่ v2 | ปี 2568</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * { font-family: 'Sarabun', sans-serif; }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
-        .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
-        .animate-float { animation: float 3s ease-in-out infinite; }
-        .chart-container { position: relative; height: 300px; }
-        .chart-sm { height: 220px; }
-        .card-hover { transition: all 0.3s ease; }
-        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1); }
+        :root {
+            --primary: #22c55e;
+            --primary-dark: #16a34a;
+            --primary-light: #4ade80;
+            --secondary: #86efac;
+            --bg: #f0fdf4;
+            --white: #ffffff;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-500: #6b7280;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.12);
+            --radius: 16px;
+            --radius-sm: 8px;
+            --sugarcane: #f59e0b;
+            --corn: #fbbf24;
+            --rice: #60a5fa;
+            --cassava: #a78bfa;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Noto Sans Thai', sans-serif; background: var(--bg); color: var(--gray-800); line-height: 1.6; min-height: 100vh; }
+        .header { background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%); padding: 2rem 1rem; text-align: center; color: var(--white); position: relative; overflow: hidden; }
+        .header::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%); animation: shimmer 3s ease-in-out infinite; }
+        @keyframes shimmer { 0%, 100% { transform: translate(-10%, -10%); } 50% { transform: translate(10%, 10%); } }
+        .header h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; position: relative; }
+        .header p { font-size: 1rem; opacity: 0.9; position: relative; }
+        .header .year-badge { display: inline-block; background: rgba(255,255,255,0.2); padding: 0.3rem 1rem; border-radius: 20px; font-size: 0.9rem; margin-top: 0.5rem; font-weight: 500; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 1.5rem; }
+        .price-reference { background: var(--white); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); margin-bottom: 2rem; border-left: 4px solid var(--primary); }
+        .price-reference h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: var(--gray-700); display: flex; align-items: center; gap: 0.5rem; }
+        .price-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; }
+        .price-item { background: var(--gray-100); padding: 1rem; border-radius: var(--radius-sm); }
+        .price-item .crop-name { font-weight: 600; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+        .price-item .price { font-size: 1.1rem; font-weight: 700; color: var(--primary-dark); }
+        .price-item .price.old { text-decoration: line-through; color: var(--gray-500); font-size: 0.9rem; font-weight: 400; }
+        .price-item .note { font-size: 0.8rem; color: var(--gray-500); margin-top: 0.25rem; }
+        .comparison-section { background: var(--white); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); margin-bottom: 2rem; overflow-x: auto; }
+        .comparison-section h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 1.5rem; color: var(--gray-700); display: flex; align-items: center; gap: 0.5rem; }
+        .comparison-section h3::before { content: ''; width: 4px; height: 24px; background: var(--primary); border-radius: 2px; }
+        .comparison-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; min-width: 800px; }
+        .comparison-table th { background: var(--gray-100); padding: 1rem; text-align: center; font-weight: 600; color: var(--gray-700); border-bottom: 2px solid var(--gray-300); white-space: nowrap; }
+        .comparison-table th:first-child { text-align: left; border-radius: var(--radius-sm) 0 0 0; }
+        .comparison-table th:last-child { border-radius: 0 var(--radius-sm) 0 0; }
+        .comparison-table td { padding: 1rem; text-align: center; border-bottom: 1px solid var(--gray-200); }
+        .comparison-table td:first-child { text-align: left; font-weight: 500; }
+        .comparison-table tr:hover { background: var(--gray-100); }
+        .comparison-table .highlight-row { background: rgba(34, 197, 94, 0.1); }
+        .comparison-table .highlight-row:hover { background: rgba(34, 197, 94, 0.15); }
+        .crop-icon-sm { display: inline-flex; align-items: center; gap: 0.5rem; }
+        .price-tag { display: inline-block; background: var(--primary); color: var(--white); padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.8rem; font-weight: 600; }
+        .price-tag.warning { background: #ef4444; }
+        .profit-positive { color: var(--primary-dark); font-weight: 600; }
+        .profit-negative { color: #ef4444; font-weight: 600; }
+        .crop-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .crop-card { background: var(--white); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); transition: transform 0.3s ease, box-shadow 0.3s ease; border: 2px solid transparent; }
+        .crop-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+        .crop-card.sugarcane { border-top: 4px solid var(--sugarcane); }
+        .crop-card.corn { border-top: 4px solid var(--corn); }
+        .crop-card.rice { border-top: 4px solid var(--rice); }
+        .crop-card.cassava { border-top: 4px solid var(--cassava); }
+        .crop-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .crop-name { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.25rem; }
+        .crop-cycle { font-size: 0.875rem; color: var(--gray-500); margin-bottom: 1rem; }
+        .crop-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+        .stat-item { background: var(--gray-100); padding: 0.75rem; border-radius: var(--radius-sm); }
+        .stat-label { font-size: 0.75rem; color: var(--gray-500); margin-bottom: 0.25rem; }
+        .stat-value { font-weight: 600; font-size: 0.9rem; }
+        .stat-value.profit { color: var(--primary-dark); }
+        .stat-value.profit-rate { color: var(--primary); }
+        .stat-value.loss { color: #ef4444; }
+        .price-trend { display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; padding: 0.2rem 0.5rem; border-radius: 4px; margin-left: 0.5rem; }
+        .price-trend.down { background: #fee2e2; color: #dc2626; }
+        .price-trend.up { background: #dcfce7; color: #16a34a; }
+        .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .chart-card { background: var(--white); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); }
+        .chart-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: var(--gray-700); display: flex; align-items: center; gap: 0.5rem; }
+        .chart-title::before { content: ''; width: 4px; height: 20px; background: var(--primary); border-radius: 2px; }
+        .chart-container { position: relative; height: 280px; }
+        .input-section { background: var(--white); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); margin-bottom: 2rem; }
+        .section-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 1.5rem; color: var(--gray-700); }
+        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+        .input-group { background: var(--gray-100); padding: 1rem; border-radius: var(--radius-sm); }
+        .input-group h4 { font-size: 1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .input-field { margin-bottom: 0.75rem; }
+        .input-field label { display: block; font-size: 0.8rem; color: var(--gray-500); margin-bottom: 0.25rem; }
+        .input-field input { width: 100%; padding: 0.6rem 0.8rem; border: 1px solid var(--gray-300); border-radius: var(--radius-sm); font-size: 0.9rem; font-family: inherit; transition: border-color 0.2s, box-shadow 0.2s; }
+        .input-field input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15); }
+        .recommendation { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); border-radius: var(--radius); padding: 2rem; color: var(--white); box-shadow: var(--shadow-lg); margin-bottom: 2rem; }
+        .recommendation h3 { font-size: 1.25rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .recommendation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+        .rec-item { background: rgba(255, 255, 255, 0.15); padding: 1rem; border-radius: var(--radius-sm); text-align: center; }
+        .rec-rank { font-size: 1.5rem; font-weight: 700; }
+        .rec-name { font-size: 1.1rem; font-weight: 600; margin: 0.5rem 0; }
+        .rec-value { font-size: 0.9rem; opacity: 0.9; }
+        .footer { text-align: center; padding: 2rem; color: var(--gray-500); font-size: 0.875rem; }
+        .footer .sources { margin-top: 0.5rem; font-size: 0.8rem; }
+        @media (max-width: 768px) { .header h1 { font-size: 1.5rem; } .charts-grid { grid-template-columns: 1fr; } .chart-container { height: 250px; } .crop-cards { grid-template-columns: 1fr; } .input-grid { grid-template-columns: 1fr; } .price-grid { grid-template-columns: 1fr; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .crop-card, .chart-card, .input-section, .recommendation, .price-reference, .comparison-section { animation: fadeIn 0.5s ease forwards; }
+        .crop-card:nth-child(1) { animation-delay: 0.1s; }
+        .crop-card:nth-child(2) { animation-delay: 0.2s; }
+        .crop-card:nth-child(3) { animation-delay: 0.3s; }
+        .crop-card:nth-child(4) { animation-delay: 0.4s; }
+        .chart-container canvas { cursor: pointer; transition: transform 0.2s ease, filter 0.2s ease; }
+        .chart-container canvas:hover { transform: scale(1.02); filter: brightness(1.05); }
+        .chart-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); z-index: 1000; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; }
+        .chart-modal.active { display: flex; opacity: 1; }
+        .modal-content { background: var(--white); border-radius: 24px; padding: 2rem; max-width: 90vw; max-height: 90vh; width: 1000px; position: relative; transform: scale(0.8) translateY(20px); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 25px 80px rgba(0, 0, 0, 0.25); overflow: hidden; }
+        .chart-modal.active .modal-content { transform: scale(1) translateY(0); }
+        .modal-close { position: absolute; top: 1rem; right: 1rem; width: 40px; height: 40px; border: none; background: var(--gray-100); border-radius: 50%; cursor: pointer; font-size: 1.5rem; color: var(--gray-700); display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; z-index: 10; }
+        .modal-close:hover { background: var(--primary); color: var(--white); transform: rotate(90deg); }
+        .modal-title { font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem; color: var(--gray-700); display: flex; align-items: center; gap: 0.75rem; }
+        .modal-title::before { content: ''; width: 5px; height: 28px; background: var(--primary); border-radius: 3px; }
+        .modal-chart-container { position: relative; height: 500px; width: 100%; }
+        .modal-chart-container canvas { max-height: 500px; }
+        .modal-hint { text-align: center; color: var(--gray-500); font-size: 0.85rem; margin-top: 1rem; opacity: 0.7; }
+        @media (max-width: 768px) { .modal-content { max-width: 95vw; padding: 1rem; } .modal-chart-container { height: 300px; } }
+        .alert-box { background: #fef3c7; border: 1px solid #f59e0b; border-radius: var(--radius-sm); padding: 1rem; margin-bottom: 1.5rem; display: flex; align-items: flex-start; gap: 0.75rem; }
+        .alert-box .icon { font-size: 1.25rem; }
+        .alert-box .content { flex: 1; }
+        .alert-box .title { font-weight: 600; color: #92400e; margin-bottom: 0.25rem; }
+        .alert-box .text { font-size: 0.9rem; color: #b45309; }
     </style>
 </head>
-<body class="bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 min-h-screen">
-    
-    <header class="bg-white/95 backdrop-blur sticky top-0 z-50 border-b border-slate-200/50">
-        <div class="max-w-7xl mx-auto px-4 py-4">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                    <div class="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg animate-float">
-                        <span class="text-3xl">🌾</span>
-                    </div>
-                    <div>
-                        <h1 class="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-                            เปรียบเทียบความคุ้มค่าพืชไร่
-                        </h1>
-                        <p class="text-slate-500">📊 มีที่ดิน X ไร่ ปลูกอะไรกำไรมากที่สุด?</p>
-                    </div>
-                </div>
-                <button onclick="resetData()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-600 transition-all">
-                    <i class="fas fa-redo mr-2"></i>รีเซ็ต
-                </button>
-            </div>
-        </div>
+<body>
+    <header class="header">
+        <h1>🌾 เครื่องคำนวณความคุ้มค่าพืชไร่ v2</h1>
+        <p>เปรียบเทียบความคุ้มค่าของพืชไร่ 4 ชนิด</p>
+        <div class="year-badge">📅 ข้อมูลราคาปี 2568</div>
     </header>
-
-    <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
-        
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="bg-white rounded-2xl p-5 shadow-lg card-hover border-l-4 border-blue-500 animate-fadeIn">
-                <p class="text-sm text-slate-500 font-medium">💵 รายได้รวม</p>
-                <p class="text-2xl font-bold text-blue-600" id="totalRevenue">฿0</p>
-            </div>
-            <div class="bg-white rounded-2xl p-5 shadow-lg card-hover border-l-4 border-orange-500 animate-fadeIn">
-                <p class="text-sm text-slate-500 font-medium">📉 ต้นทุนรวม</p>
-                <p class="text-2xl font-bold text-orange-600" id="totalCost">฿0</p>
-            </div>
-            <div class="bg-white rounded-2xl p-5 shadow-lg card-hover border-l-4 border-green-500 animate-fadeIn">
-                <p class="text-sm text-slate-500 font-medium">💰 กำไรสุทธิ</p>
-                <p class="text-2xl font-bold text-green-600" id="totalProfit">฿0</p>
-            </div>
-            <div class="bg-white rounded-2xl p-5 shadow-lg card-hover border-l-4 border-purple-500 animate-fadeIn">
-                <p class="text-sm text-slate-500 font-medium">📈 ROI เฉลี่ย</p>
-                <p class="text-2xl font-bold text-purple-600" id="avgRoi">0%</p>
+    <div class="container">
+        <div class="alert-box">
+            <span class="icon">⚠️</span>
+            <div class="content">
+                <div class="title">ราคาพืชไร่ปี 2568 มีการเปลี่ยนแปลง!</div>
+                <div class="text">ราคาอ้อยปีนี้ลดลงจาก ฿1,160 เหลือ ฿890/ตัน (ต่อ 10 CCS) | มันสำปะหลังอยู่ที่ ฿2.10/กก.</div>
             </div>
         </div>
-
-        <!-- Best Crop Banner -->
-        <div class="bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 rounded-3xl p-6 text-white shadow-2xl animate-fadeIn">
-            <div class="flex items-center gap-4">
-                <div class="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center">
-                    <span class="text-5xl">🏆</span>
+        <div class="price-reference">
+            <h3>📋 ราคาอ้างอิงปี 2568</h3>
+            <div class="price-grid">
+                <div class="price-item">
+                    <div class="crop-name">🌿 อ้อย (Sugarcane)</div>
+                    <div class="price">฿890/ตัน <span class="price-trend down">▼ -23%</span></div>
+                    <div class="price old">ปีก่อน: ฿1,160/ตัน</div>
+                    <div class="note">ฤดู 2568/69 | ที่ 10 CCS</div>
                 </div>
-                <div>
-                    <p class="text-white/80 text-sm font-medium">🎯 พืชที่คุ้มค่าที่สุด</p>
-                    <h2 class="text-3xl font-bold" id="bestCrop">-</h2>
-                    <p class="text-lg text-white/90">ROI: <span class="font-bold" id="bestRoi">0</span>% | กำไร: <span class="font-bold" id="bestProfit">฿0</span> | กำไร/ปี: <span class="font-bold" id="bestProfitYear">฿0</span></p>
+                <div class="price-item">
+                    <div class="crop-name">🌽 ข้าวโพดเลี้ยงสัตว์ (Corn)</div>
+                    <div class="price">฿7.88-9.80/กก.</div>
+                    <div class="price old">฿7,880-9,800/ตัน</div>
+                    <div class="note">ข้าวโพดแห้ง 14.5% ความชื้น</div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Quick Stats -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-4 border border-green-200">
-                <p class="text-sm font-medium text-green-700">🥇 กำไรสูงสุด</p>
-                <p class="text-lg font-bold text-green-600" id="rank1Profit">-</p>
-                <p class="text-sm text-green-500" id="rank1Name">-</p>
-            </div>
-            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-4 border border-blue-200">
-                <p class="text-sm font-medium text-blue-700">📈 ROI สูงสุด</p>
-                <p class="text-lg font-bold text-blue-600" id="rank2Roi">-</p>
-                <p class="text-sm text-blue-500" id="rank2Name">-</p>
-            </div>
-            <div class="bg-gradient-to-br from-purple-50 to-violet-50 rounded-2xl p-4 border border-purple-200">
-                <p class="text-sm font-medium text-purple-700">⚡ กำไร/ปี สูงสุด</p>
-                <p class="text-lg font-bold text-purple-600" id="rank3ProfitYear">-</p>
-                <p class="text-sm text-purple-500" id="rank3Name">-</p>
-            </div>
-            <div class="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl p-4 border border-orange-200">
-                <p class="text-sm font-medium text-orange-700">💵 ลงทุนต่ำสุด</p>
-                <p class="text-lg font-bold text-orange-600" id="rank4Cost">-</p>
-                <p class="text-sm text-orange-500" id="rank4Name">-</p>
-            </div>
-        </div>
-
-        <!-- Input Section -->
-        <div class="bg-white rounded-2xl shadow-xl p-6 animate-fadeIn">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl font-bold text-slate-800"><i class="fas fa-calculator text-emerald-500 mr-2"></i>กรอกข้อมูล</h2>
-                <div class="flex items-center gap-2">
-                    <label class="text-sm font-medium text-slate-600">📏 จำนวนไร่:</label>
-                    <input type="number" id="raiInput" value="10" min="1" class="w-24 px-4 py-2 border-2 border-emerald-300 rounded-xl text-center font-bold text-lg" onchange="recalculate()">
+                <div class="price-item">
+                    <div class="crop-name">🌾 ข้าว (Rice)</div>
+                    <div class="price">฿6,500-15,000/ตัน</div>
+                    <div class="price old">หอมมะลิ: ฿14,000-15,000</div>
+                    <div class="note">ข้าวเจ้า: ฿6,500-8,000 | เหนียว: ฿11,000-12,000</div>
                 </div>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead>
-                        <tr class="bg-slate-50">
-                            <th class="px-4 py-3 text-left text-sm font-bold">🌱 พืช</th>
-                            <th class="px-4 py-3 text-center text-sm font-bold">⏰ รอบปลูก</th>
-                            <th class="px-4 py-3 text-right text-sm font-bold">🌾 ผลผลิต</th>
-                            <th class="px-4 py-3 text-right text-sm font-bold">💵 ราคา/ตัน</th>
-                            <th class="px-4 py-3 text-right text-sm font-bold">📉 ต้นทุน/ไร่</th>
-                            <th class="px-4 py-3 text-right text-sm font-bold text-emerald-600">💰 กำไร</th>
-                        </tr>
-                    </thead>
-                    <tbody id="cropTable"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Charts Section -->
-        <div class="bg-white rounded-2xl shadow-xl p-6 animate-fadeIn">
-            <h2 class="text-xl font-bold text-slate-800 mb-6"><i class="fas fa-chart-bar text-blue-500 mr-2"></i>📊 กราฟวิเคราะห์</h2>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <div class="bg-slate-50 rounded-2xl p-5">
-                    <h3 class="text-sm font-bold text-slate-700 mb-3">💰 กำไรเปรียบเทียบ</h3>
-                    <div class="chart-container"><canvas id="profitBarChart"></canvas></div>
-                </div>
-                <div class="bg-slate-50 rounded-2xl p-5">
-                    <h3 class="text-sm font-bold text-slate-700 mb-3">📈 ROI เปรียบเทียบ</h3>
-                    <div class="chart-container"><canvas id="roiBarChart"></canvas></div>
-                </div>
-                <div class="bg-slate-50 rounded-2xl p-5">
-                    <h3 class="text-sm font-bold text-slate-700 mb-3">🥧 สัดส่วนกำไร</h3>
-                    <div class="chart-container"><canvas id="profitPieChart"></canvas></div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                <div class="bg-blue-50 rounded-2xl p-5">
-                    <h3 class="text-sm font-bold text-slate-700 mb-3">📊 รายได้ vs ต้นทุน</h3>
-                    <div class="chart-container chart-sm"><canvas id="revenueCostChart"></canvas></div>
-                </div>
-                <div class="bg-purple-50 rounded-2xl p-5">
-                    <h3 class="text-sm font-bold text-slate-700 mb-3">📈 แนวโน้มกำไร</h3>
-                    <div class="chart-container chart-sm"><canvas id="profitLineChart"></canvas></div>
-                </div>
-                <div class="bg-green-50 rounded-2xl p-5">
-                    <h3 class="text-sm font-bold text-slate-700 mb-3">💵 กำไรต่อไร่</h3>
-                    <div class="chart-container chart-sm"><canvas id="profitPerRaiChart"></canvas></div>
-                </div>
-                <div class="bg-orange-50 rounded-2xl p-5">
-                    <h3 class="text-sm font-bold text-slate-700 mb-3">📉 ต้นทุนต่อไร่</h3>
-                    <div class="chart-container chart-sm"><canvas id="costPerRaiChart"></canvas></div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-pink-50 rounded-2xl p-5">
-                    <h3 class="text-sm font-bold text-slate-700 mb-3">🕸️ Radar เปรียบเทียบ</h3>
-                    <div class="chart-container"><canvas id="radarChart"></canvas></div>
-                </div>
-                <div class="bg-cyan-50 rounded-2xl p-5">
-                    <h3 class="text-sm font-bold text-slate-700 mb-3">📊 Area Chart</h3>
-                    <div class="chart-container"><canvas id="areaChart"></canvas></div>
+                <div class="price-item">
+                    <div class="crop-name">🥔 มันสำปะหลัง (Cassava)</div>
+                    <div class="price">฿2.10/กก. <span class="price-trend down">▼ -36%</span></div>
+                    <div class="price old">฿3.30/กก. (ปีก่อน)</div>
+                    <div class="note">หัวสด | ธันวาคม 2568</div>
                 </div>
             </div>
         </div>
-
-        <!-- Comparison Table -->
-        <div class="bg-white rounded-2xl shadow-xl overflow-hidden animate-fadeIn">
-            <div class="bg-gradient-to-r from-emerald-500 to-teal-600 px-6 py-5">
-                <h2 class="text-xl font-bold text-white"><i class="fas fa-table mr-2"></i>📊 ตารางเปรียบเทียบรายละเอียด</h2>
-                <p class="text-sm text-white/80">เปรียบเทียบที่ <span id="tableRai" class="font-bold">10</span> ไร่เท่ากัน</p>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-slate-50">
-                        <tr>
-                            <th class="px-4 py-3 text-center text-sm font-bold">🏆</th>
-                            <th class="px-4 py-3 text-left text-sm font-bold">🌱 พืช</th>
-                            <th class="px-4 py-3 text-center text-sm font-bold">⏰ รอบ</th>
-                            <th class="px-4 py-3 text-right text-sm font-bold">🌾 ผลผลิต</th>
-                            <th class="px-4 py-3 text-right text-sm font-bold">💵 ราคา</th>
-                            <th class="px-4 py-3 text-right text-sm font-bold">📉 ต้นทุน</th>
-                            <th class="px-4 py-3 text-right text-sm font-bold text-blue-600 bg-blue-50">💵 รายได้</th>
-                            <th class="px-4 py-3 text-right text-sm font-bold text-red-600 bg-red-50">📉 ต้นทุนรวม</th>
-                            <th class="px-4 py-3 text-right text-sm font-bold text-emerald-600 bg-emerald-50">💰 กำไร</th>
-                            <th class="px-4 py-3 text-right text-sm font-bold text-purple-600">📊 ROI</th>
-                            <th class="px-4 py-3 text-right text-sm font-bold text-orange-600">⚡ กำไร/ปี</th>
-                        </tr>
-                    </thead>
-                    <tbody id="comparisonTable"></tbody>
-                    <tfoot class="bg-emerald-50"><tr id="tableFooter"></tr></tfoot>
-                </table>
-            </div>
+        <div class="comparison-section">
+            <h3>📊 ตารางเปรียบเทียบความคุ้มค่าพืชไร่</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr><th>พืชไร่</th><th>ราคา/ตัน</th><th>ผลผลิต/ไร่<br>(ตัน)</th><th>รอบปลูก</th><th>ต้นทุน/ไร่<br>(บาท)</th><th>รายได้/ไร่/ปี<br>(บาท)</th><th>กำไร/ไร่/ปี<br>(บาท)</th><th>% กำไร</th></tr>
+                </thead>
+                <tbody id="comparisonTableBody"></tbody>
+            </table>
         </div>
-
-        <!-- Insights -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-6 text-white shadow-xl">
-                <h3 class="font-bold text-lg mb-2">🥇 คำแนะนำ</h3>
-                <p class="text-2xl font-bold mb-2" id="recommendCrop">-</p>
-                <p class="text-sm text-white/80" id="recommendReason">-</p>
-            </div>
-            <div class="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-6 text-white shadow-xl">
-                <h3 class="font-bold text-lg mb-2">📊 สถิติ</h3>
-                <div class="space-y-2 text-sm">
-                    <div class="flex justify-between"><span>จำนวนพืช:</span><span class="font-bold" id="cropCount">0</span></div>
-                    <div class="flex justify-between"><span>รายได้เฉลี่ย:</span><span class="font-bold" id="avgRevenue">-</span></div>
-                    <div class="flex justify-between"><span>กำไรเฉลี่ย:</span><span class="font-bold" id="avgProfit">-</span></div>
-                    <div class="flex justify-between"><span>ROI เฉลี่ย:</span><span class="font-bold" id="avgRoiTable">-</span></div>
-                </div>
-            </div>
-            <div class="bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl p-6 text-white shadow-xl">
-                <h3 class="font-bold text-lg mb-2">💡 ข้อคิด</h3>
-                <p class="text-sm" id="insight">-</p>
-            </div>
+        <div class="crop-cards" id="cropCards"></div>
+        <div class="charts-grid">
+            <div class="chart-card"><h3 class="chart-title">📊 กำไรต่อไร่ต่อปี (บาท)</h3><div class="chart-container"><canvas id="profitChart"></canvas></div></div>
+            <div class="chart-card"><h3 class="chart-title">📈 อัตรากำไร (%)</h3><div class="chart-container"><canvas id="profitRateChart"></canvas></div></div>
+            <div class="chart-card"><h3 class="chart-title">💰 ต้นทุนต่อไร่ (บาท)</h3><div class="chart-container"><canvas id="costChart"></canvas></div></div>
+            <div class="chart-card"><h3 class="chart-title">🌱 ผลผลิตต่อรอบ (ตัน/ไร่)</h3><div class="chart-container"><canvas id="yieldChart"></canvas></div></div>
+            <div class="chart-card" style="grid-column: span 2;"><h3 class="chart-title">📅 รอบปลูกและจำนวนรอบต่อปี</h3><div class="chart-container"><canvas id="ganttChart"></canvas></div></div>
         </div>
-    </main>
-
-    <footer class="bg-white border-t border-slate-200 py-8 mt-8">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <p class="text-lg font-medium text-slate-700">🌾 <span class="font-bold">Crop Profit Calculator</span> | Powered by <span class="text-emerald-600 font-bold">OpenClaw</span></p>
-            <p class="text-sm text-slate-500 mt-2">📊 ข้อมูลราคาจาก ธนาคารแห่งประเทศไทย และกระทรวงเกษตรฯ</p>
+        <h2 style="font-size: 1.5rem; margin: 2rem 0 1rem; color: var(--gray-700);">📊 กราฟเปรียบเทียบเพิ่มเติม</h2>
+        <div class="charts-grid">
+            <div class="chart-card"><h3 class="chart-title">🍩 สัดส่วนกำไรรวมต่อปี</h3><div class="chart-container"><canvas id="pieChart"></canvas></div></div>
+            <div class="chart-card"><h3 class="chart-title">🕸️ เปรียบเทียบหลายมิติ</h3><div class="chart-container"><canvas id="radarChart"></canvas></div></div>
+            <div class="chart-card" style="grid-column: span 2;"><h3 class="chart-title">📈 รายได้สะสม 5 ปี</h3><div class="chart-container"><canvas id="lineChart"></canvas></div></div>
+            <div class="chart-card" style="grid-column: span 2;"><h3 class="chart-title">📊 ต้นทุนแยกประเภท</h3><div class="chart-container"><canvas id="stackedBarChart"></canvas></div></div>
+            <div class="chart-card"><h3 class="chart-title">🎯 คะแนนรวม</h3><div class="chart-container"><canvas id="polarChart"></canvas></div></div>
         </div>
-    </footer>
-
+        <div class="input-section">
+            <h3 class="section-title">✏️ ปรับแต่งข้อมูล (คำนวณอัตโนมัติ)</h3>
+            <div class="input-grid" id="inputGrid"></div>
+        </div>
+        <div class="recommendation">
+            <h3>🏆 สรุปความคุ้มค่า</h3>
+            <p style="margin-bottom: 1rem; opacity: 0.9;">จัดอันดับพืชที่คุ้มค่าที่สุดตามเงื่อนไขที่กรอก</p>
+            <div class="recommendation-grid" id="recommendationGrid"></div>
+        </div>
+        <footer class="footer">
+            <p>📊 ข้อมูลอ้างอิงราคาพืชไร่ปี 2568 | ตั้งค่าเพื่อคำนวณความคุ้มค่าตามสภาพจริงของคุณ</p>
+            <p class="sources">📌 แหล่งที่มา: สำนักงานการค้าภายในกระทรวงพาณิชย์, สมาคมผู้ผลิตอ้อยแห่งประเทศไทย, ราคาตลาดสินค้าเกษตร</p>
+        </footer>
+    </div>
+    <div class="chart-modal" id="chartModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">×</button>
+            <h3 class="modal-title" id="modalTitle">กราฟ</h3>
+            <div class="modal-chart-container"><canvas id="modalChart"></canvas></div>
+            <p class="modal-hint">💡 กดปุ่ม × หรือกดพื้นหลังเพื่อปิด</p>
+        </div>
+    </div>
     <script>
-        const defaultCrops = [
-            { name: 'อ้อยโรงงาน', cycle: 36, yield: 12.8, price: 1147, cost: 13077 },
-            { name: 'ข้าวโพดเลี้ยงสัตว์', cycle: 4, yield: 1.1, price: 9950, cost: 5085 },
-            { name: 'ข้าว', cycle: 4, yield: 0.8, price: 14240, cost: 5287 },
-            { name: 'มันสำปะหลัง', cycle: 12, yield: 3.5, price: 1440, cost: 6770 }
+        const crops = [
+            { id: 'sugarcane', name: 'อ้อย', icon: '🌿', cycle: '12 เดือน/รอบ', cycleMonths: 12, cyclesPerYear: 1, yieldMin: 10, yieldMax: 15, priceMin: 890, priceMax: 890, priceOld: 1160, cost: 13000, color: '#f59e0b' },
+            { id: 'corn', name: 'ข้าวโพดเลี้ยงสัตว์', icon: '🌽', cycle: '4 เดือน/รอบ', cycleMonths: 4, cyclesPerYear: 3, yieldMin: 1.0, yieldMax: 1.2, priceMin: 7880, priceMax: 9800, cost: 5000, color: '#fbbf24' },
+            { id: 'rice', name: 'ข้าว', icon: '🌾', cycle: '4 เดือน/รอบ', cycleMonths: 4, cyclesPerYear: 2, yieldMin: 0.7, yieldMax: 0.9, priceMin: 6500, priceMax: 15000, cost: 5500, color: '#60a5fa' },
+            { id: 'cassava', name: 'มันสำปะหลัง', icon: '🥔', cycle: '10 เดือน/รอบ', cycleMonths: 10, cyclesPerYear: 1, yieldMin: 3, yieldMax: 4, priceMin: 2100, priceMax: 2100, cost: 6750, color: '#a78bfa' }
         ];
-
-        let crops = JSON.parse(JSON.stringify(defaultCrops));
-        let charts = {};
-
-        function formatCurrency(value) {
-            if (Math.abs(value) >= 1000000) return (value / 1000000).toFixed(2) + 'M ฿';
-            if (Math.abs(value) >= 1000) return (value / 1000).toFixed(0) + 'K ฿';
-            return new Intl.NumberFormat('th-TH', { maximumFractionDigits: 0 }).format(value) + ' ฿';
+        crops.forEach(crop => {
+            const avgYield = (crop.yieldMin + crop.yieldMax) / 2;
+            const avgPrice = (crop.priceMin + crop.priceMax) / 2;
+            const revenuePerCycle = avgYield * avgPrice;
+            const profitPerCycle = revenuePerCycle - crop.cost;
+            const profitPerYear = profitPerCycle * crop.cyclesPerYear;
+            const profitRate = ((revenuePerCycle - crop.cost) / revenuePerCycle) * 100;
+            crop.revenuePerCycle = revenuePerCycle;
+            crop.profitPerCycle = profitPerCycle;
+            crop.profitPerYear = profitPerYear;
+            crop.profitRate = profitRate;
+            crop.avgYield = avgYield;
+            crop.avgPrice = avgPrice;
+        });
+        let profitChart, profitRateChart, costChart, yieldChart, ganttChart;
+        let pieChart, radarChart, lineChart, stackedBarChart, polarChart;
+        function init() {
+            renderComparisonTable();
+            renderCropCards();
+            renderInputFields();
+            initCharts();
+            initNewCharts();
+            updateRecommendations();
+            addChartClickHandlers();
         }
-
-        function calculate(crop, rai) {
-            const revenue = crop.yield * crop.price * rai;
-            const totalCost = crop.cost * rai;
-            const profit = revenue - totalCost;
-            const roi = totalCost > 0 ? ((profit / totalCost) * 100) : 0;
-            const profitPerYear = (profit / crop.cycle) * 12;
-            const profitPerRai = profit / rai;
-            return { ...crop, rai, revenue, totalCost, profit, roi, profitPerYear, profitPerRai };
-        }
-
-        function recalculate() {
-            const rai = parseFloat(document.getElementById('raiInput').value) || 10;
-            document.getElementById('tableRai').textContent = rai;
-
-            const results = crops.map(crop => calculate(crop, rai));
-            const sorted = [...results].sort((a, b) => b.profit - a.profit);
-
-            const totalRevenue = results.reduce((sum, r) => sum + r.revenue, 0);
-            const totalCost = results.reduce((sum, r) => sum + r.totalCost, 0);
-            const totalProfit = results.reduce((sum, r) => sum + r.profit, 0);
-            const avgRoi = results.reduce((sum, r) => sum + r.roi, 0) / results.length;
-
-            document.getElementById('totalRevenue').textContent = formatCurrency(totalRevenue);
-            document.getElementById('totalCost').textContent = formatCurrency(totalCost);
-            document.getElementById('totalProfit').textContent = formatCurrency(totalProfit);
-            document.getElementById('avgRoi').textContent = avgRoi.toFixed(1) + '%';
-
-            const best = sorted[0];
-            document.getElementById('bestCrop').textContent = best.name;
-            document.getElementById('bestRoi').textContent = best.roi.toFixed(1);
-            document.getElementById('bestProfit').textContent = formatCurrency(best.profit);
-            document.getElementById('bestProfitYear').textContent = formatCurrency(best.profitPerYear);
-
-            const maxProfitCrop = [...results].sort((a, b) => b.profit - a.profit)[0];
-            const maxRoiCrop = [...results].sort((a, b) => b.roi - a.roi)[0];
-            const maxProfitYearCrop = [...results].sort((a, b) => b.profitPerYear - a.profitPerYear)[0];
-            const minCostCrop = [...results].sort((a, b) => a.cost - b.cost)[0];
-
-            document.getElementById('rank1Profit').textContent = formatCurrency(maxProfitCrop.profit);
-            document.getElementById('rank1Name').textContent = maxProfitCrop.name;
-            document.getElementById('rank2Roi').textContent = maxRoiCrop.roi.toFixed(1) + '%';
-            document.getElementById('rank2Name').textContent = maxRoiCrop.name;
-            document.getElementById('rank3ProfitYear').textContent = formatCurrency(maxProfitYearCrop.profitPerYear);
-            document.getElementById('rank3Name').textContent = maxProfitYearCrop.name;
-            document.getElementById('rank4Cost').textContent = formatCurrency(minCostCrop.cost);
-            document.getElementById('rank4Name').textContent = minCostCrop.name;
-
-            document.getElementById('cropCount').textContent = results.length;
-            document.getElementById('avgRevenue').textContent = formatCurrency(totalRevenue / results.length);
-            document.getElementById('avgProfit').textContent = formatCurrency(totalProfit / results.length);
-            document.getElementById('avgRoiTable').textContent = avgRoi.toFixed(1) + '%';
-
-            document.getElementById('recommendCrop').textContent = best.name;
-            document.getElementById('recommendReason').textContent = `กำไร ${formatCurrency(best.profit)}/รอบ, ROI ${best.roi.toFixed(1)}%`;
-
-            let insight = '';
-            if (best.roi > 100) insight = 'พืชนี้มีความคุ้มค่าสูงมาก! ลงทุน 1 บาทได้กำไรมากกว่า 1 บาท';
-            else if (best.roi > 50) insight = 'พืชนี้คุ้มค่ามาก เหมาะสำหรับการลงทุน';
-            else if (best.roi > 0) insight = 'พืชนี้ยังคงได้กำไร แต่ควรพิจารณาต้นทุนให้ละเอียด';
-            else insight = 'ควรพิจารณาพืชอื่น หรือปรับลดต้นทุน';
-            document.getElementById('insight').textContent = insight;
-
-            updateTable(results, sorted);
-            updateCharts(results);
-        }
-
-        function updateTable(results, sorted) {
-            const tbody = document.getElementById('comparisonTable');
-            tbody.innerHTML = results.map((r, i) => {
-                const rank = sorted.findIndex(s => s.name === r.name) + 1;
-                const rankClass = rank === 1 ? 'bg-amber-500' : rank === 2 ? 'bg-gray-400' : rank === 3 ? 'bg-amber-700' : 'bg-slate-200';
-                const profitClass = r.profit >= 0 ? 'text-green-600' : 'text-red-600';
-                
-                return `
-                    <tr class="border-b border-slate-100 hover:bg-slate-50">
-                        <td class="px-4 py-3 text-center"><span class="inline-flex items-center justify-center w-7 h-7 rounded-full text-sm font-bold ${rankClass} text-white">${rank}</span></td>
-                        <td class="px-4 py-3 font-medium">${r.name}</td>
-                        <td class="px-4 py-3 text-center">${r.cycle} เดือน</td>
-                        <td class="px-4 py-3 text-right">${r.yield} ตัน</td>
-                        <td class="px-4 py-3 text-right">${formatCurrency(r.price)}</td>
-                        <td class="px-4 py-3 text-right">${formatCurrency(r.cost)}</td>
-                        <td class="px-4 py-3 text-right bg-blue-50 font-medium text-blue-600">${formatCurrency(r.revenue)}</td>
-                        <td class="px-4 py-3 text-right bg-red-50 text-red-600">${formatCurrency(r.totalCost)}</td>
-                        <td class="px-4 py-3 text-right bg-emerald-50 font-bold ${profitClass}">${r.profit >= 0 ? '+' : ''}${formatCurrency(r.profit)}</td>
-                        <td class="px-4 py-3 text-right"><span class="px-2 py-1 rounded-full text-xs font-medium ${r.roi >= 0 ? 'bg-green-100 text-green 'bg-red--700' :100 text-red-700'}">${r.roi.toFixed(1)}%</span></td>
-                        <td class="px-4 py-3 text-right font-medium text-orange-600">${formatCurrency(r.profitPerYear)}</td>
-                    </tr>
-                `;
+        function renderComparisonTable() {
+            const tbody = document.getElementById('comparisonTableBody');
+            tbody.innerHTML = crops.map(crop => {
+                const isLoss = crop.profitPerYear < 0;
+                const profitClass = isLoss ? 'profit-negative' : 'profit-positive';
+                const declinePct = crop.priceOld ? Math.round((1 - crop.priceMin/crop.priceOld)*100) : 0;
+                return `<tr class="${crop.id === 'cassava' || crop.id === 'sugarcane' ? 'highlight-row' : ''}">
+                    <td><span class="crop-icon-sm">${crop.icon} ${crop.name}</span>${crop.priceOld ? `<span class="price-trend down">▼ ${declinePct}%</span>` : ''}</td>
+                    <td>฿${formatNumber(crop.priceMin)}-${formatNumber(crop.priceMax)}</td>
+                    <td>${crop.yieldMin}-${crop.yieldMax}</td>
+                    <td>${crop.cycle}<br>(${crop.cyclesPerYear}/ปี)</td>
+                    <td>฿${formatNumber(crop.cost)}</td>
+                    <td>฿${formatNumber(crop.revenuePerCycle * crop.cyclesPerYear)}</td>
+                    <td class="${profitClass}">${isLoss ? '-' : ''}฿${formatNumber(Math.abs(crop.profitPerYear))}</td>
+                    <td class="${crop.profitRate < 0 ? 'profit-negative' : 'profit-positive'}">${crop.profitRate.toFixed(1)}%</td>
+                </tr>`;
             }).join('');
-
-            const footerTotal = results.reduce((sum, r) => ({ revenue: sum.revenue + r.revenue, cost: sum.cost + r.totalCost, profit: sum.profit + r.profit }), { revenue: 0, cost: 0, profit: 0 });
-            const avgRoi = results.reduce((sum, r) => sum + r.roi, 0) / results.length;
-            document.getElementById('tableFooter').innerHTML = `
-                <td colspan="5" class="px-4 py-3 font-bold">รวมทั้งหมด (${results.length} พืช)</td>
-                <td class="px-4 py-3 text-right bg-blue-50 font-bold text-blue-600">${formatCurrency(footerTotal.revenue)}</td>
-                <td class="px-4 py-3 text-right bg-red-50 font-bold text-red-600">${formatCurrency(footerTotal.cost)}</td>
-                <td class="px-4 py-3 text-right bg-emerald-50 font-bold text-emerald-600">${formatCurrency(footerTotal.profit)}</td>
-                <td class="px-4 py-3 text-right font-bold text-purple-600">${avgRoi.toFixed(1)}%</td>
-                <td></td>
-            `;
         }
-
-        function updateCharts(results) {
-            const names = results.map(r => r.name);
-            const profits = results.map(r => r.profit);
-            const rois = results.map(r => r.roi);
-            const revenues = results.map(r => r.revenue);
-            const costs = results.map(r => r.totalCost);
-            const profitPerRai = results.map(r => r.profitPerRai);
-            const costPerRai = results.map(r => r.cost);
-            
-            const colors = ['#10b981', '#f59e0b', '#3b82f6', '#8b5cf6'];
-            const colorRgba = colors.map(c => c + '99');
-
-            Object.values(charts).forEach(c => c.destroy());
-            charts = {};
-
-            charts.profitBar = new Chart(document.getElementById('profitBarChart'), {
-                type: 'bar',
-                data: { labels: names, datasets: [{ label: 'กำไร (บาท)', data: profits, backgroundColor: colorRgba, borderColor: colors, borderWidth: 2, borderRadius: 8 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => formatCurrency(v) } } } }
+        function renderCropCards() {
+            const container = document.getElementById('cropCards');
+            container.innerHTML = crops.map(crop => {
+                const isLoss = crop.profitPerYear < 0;
+                return `<div class="crop-card ${crop.id}">
+                    <div class="crop-icon">${crop.icon}</div>
+                    <div class="crop-name">${crop.name}</div>
+                    <div class="crop-cycle">รอบปลูก: ${crop.cycle}</div>
+                    <div class="crop-stats">
+                        <div class="stat-item"><div class="stat-label">ผลผลิต/ไร่</div><div class="stat-value">${crop.yieldMin}-${crop.yieldMax} MT</div></div>
+                        <div class="stat-item"><div class="stat-label">ราคา/ตัน</div><div class="stat-value">฿${formatNumber(crop.priceMin)}-${formatNumber(crop.priceMax)}</div></div>
+                        <div class="stat-item"><div class="stat-label">ต้นทุน/ไร่</div><div class="stat-value">฿${formatNumber(crop.cost)}</div></div>
+                        <div class="stat-item"><div class="stat-label">กำไร/ไร่/ปี</div><div class="stat-value ${isLoss ? 'loss' : 'profit'}">${isLoss ? '-' : '+'}฿${formatNumber(Math.abs(crop.profitPerYear))}</div></div>
+                        <div class="stat-item" style="grid-column: span 2;"><div class="stat-label">% กำไร</div><div class="stat-value ${crop.profitRate < 0 ? 'loss' : 'profit-rate'}">${crop.profitRate.toFixed(1)}%</div></div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+        function renderInputFields() {
+            const container = document.getElementById('inputGrid');
+            const icons = { sugarcane: '🌿', corn: '🌽', rice: '🌾', cassava: '🥔' };
+            container.innerHTML = crops.map(crop => `<div class="input-group">
+                <h4>${icons[crop.id]} ${crop.name}</h4>
+                <div class="input-field"><label>ผลผลิต/ไร่ (ตัน)</label><input type="number" step="0.1" value="${crop.avgYield}" data-crop="${crop.id}" data-type="yield" onchange="updateCropData('${crop.id}')"></div>
+                <div class="input-field"><label>ราคา/ตัน (บาท)</label><input type="number" value="${crop.avgPrice}" data-crop="${crop.id}" data-type="price" onchange="updateCropData('${crop.id}')"></div>
+                <div class="input-field"><label>ต้นทุน/ไร่ (บาท)</label><input type="number" value="${crop.cost}" data-crop="${crop.id}" data-type="cost" onchange="updateCropData('${crop.id}')"></div>
+            </div>`).join('');}
+        function updateCropData(cropId) {
+            const inputs = document.querySelectorAll(`input[data-crop="${cropId}"]`);
+            const crop = crops.find(c => c.id === cropId);
+            inputs.forEach(input => {
+                const type = input.dataset.type;
+                const value = parseFloat(input.value);
+                if (type === 'yield') crop.userYield = value;
+                if (type === 'price') crop.userPrice = value;
+                if (type === 'cost') crop.userCost = value;
             });
-
-            charts.roiBar = new Chart(document.getElementById('roiBarChart'), {
-                type: 'bar',
-                data: { labels: names, datasets: [{ label: 'ROI (%)', data: rois, backgroundColor: colorRgba, borderColor: colors, borderWidth: 2, borderRadius: 8 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            crops.forEach(crop => {
+                const yieldVal = crop.userYield || crop.avgYield;
+                const priceVal = crop.userPrice || crop.avgPrice;
+                const costVal = crop.userCost || crop.cost;
+                const revenuePerCycle = yieldVal * priceVal;
+                const profitPerCycle = revenuePerCycle - costVal;
+                const profitPerYear = profitPerCycle * crop.cyclesPerYear;
+                const profitRate = ((revenuePerCycle - costVal) / revenuePerCycle) * 100;
+                crop.calcYield = yieldVal;
+                crop.calcPrice = priceVal;
+                crop.calcCost = costVal;
+                crop.calcProfitPerYear = profitPerYear;
+                crop.calcProfitRate = profitRate;
             });
-
-            charts.profitPie = new Chart(document.getElementById('profitPieChart'), {
+            updateCharts();
+            updateRecommendations();
+            updateNewCharts();
+        }
+        function initCharts() {
+            const profitCtx = document.getElementById('profitChart').getContext('2d');
+            profitChart = new Chart(profitCtx, {
+                type: 'bar',
+                data: {
+                    labels: crops.map(c => c.name),
+                    datasets: [{ label: 'กำไร/ไร่/ปี', data: crops.map(c => c.profitPerYear), backgroundColor: crops.map(c => c.color + 'cc'), borderColor: crops.map(c => c.color), borderWidth: 2, borderRadius: 8 }]
+                },
+                options: getChartOptions('กำไรต่อไร่ต่อปี (บาท)')
+            });
+            const profitRateCtx = document.getElementById('profitRateChart').getContext('2d');
+            profitRateChart = new Chart(profitRateCtx, {
+                type: 'bar',
+                data: { labels: crops.map(c => c.name), datasets: [{ label: '% กำไร', data: crops.map(c => c.profitRate), backgroundColor: 'rgba(34, 197, 94, 0.7)', borderColor: 'rgb(22, 163, 74)', borderWidth: 2, borderRadius: 8 }] },
+                options: getChartOptions('อัตรากำไร (%)')
+            });
+            const costCtx = document.getElementById('costChart').getContext('2d');
+            costChart = new Chart(costCtx, {
+                type: 'bar',
+                data: { labels: crops.map(c => c.name), datasets: [{ label: 'ต้นทุน/ไร่', data: crops.map(c => c.cost), backgroundColor: 'rgba(239, 68, 68, 0.7)', borderColor: 'rgb(220, 38, 38)', borderWidth: 2, borderRadius: 8 }] },
+                options: getChartOptions('ต้นทุน (บาท)')
+            });
+            const yieldCtx = document.getElementById('yieldChart').getContext('2d');
+            yieldChart = new Chart(yieldCtx, {
+                type: 'bar',
+                data: { labels: crops.map(c => c.name), datasets: [{ label: 'ผลผลิต/รอบ', data: crops.map(c => (c.yieldMin + c.yieldMax) / 2), backgroundColor: crops.map(c => c.color + 'cc'), borderColor: crops.map(c => c.color), borderWidth: 2, borderRadius: 8 }] },
+                options: getChartOptions('ผลผลิต (ตัน/ไร่)')
+            });
+            const ganttCtx = document.getElementById('ganttChart').getContext('2d');
+            ganttChart = new Chart(ganttCtx, {
+                type: 'bar',
+                data: {
+                    labels: crops.map(c => c.name),
+                    datasets: [
+                        { label: 'ระยะเวลาปลูก (เดือน)', data: crops.map(c => c.cycleMonths), backgroundColor: 'rgba(34, 197, 94, 0.5)', borderColor: 'rgb(22, 163, 74)', borderWidth: 2, borderRadius: 8 },
+                        { label: 'รอบต่อปี', data: crops.map(c => c.cyclesPerYear * 12), backgroundColor: 'rgba(59, 130, 246, 0.5)', borderColor: 'rgb(37, 99, 235)', borderWidth: 2, borderRadius: 8 }
+                    ]
+                },
+                options: { ...getChartOptions(''), plugins: { legend: { position: 'top', labels: { font: { family: 'Noto Sans Thai' } } } }, scales: { y: { beginAtZero: true, title: { display: true, text: 'เดือน / จำนวนรอบ', font: { family: 'Noto Sans Thai' } } } } }
+            });
+        }
+        function initNewCharts() {
+            const colors = { sugarcane: { bg: 'rgba(245, 158, 11, 0.8)', border: 'rgb(245, 158, 11)' }, corn: { bg: 'rgba(251, 191, 36, 0.8)', border: 'rgb(251, 191, 36)' }, rice: { bg: 'rgba(96, 165, 250, 0.8)', border: 'rgb(96, 165, 250)' }, cassava: { bg: 'rgba(167, 139, 250, 0.8)', border: 'rgb(167, 139, 250)' } };
+            const pieCtx = document.getElementById('pieChart').getContext('2d');
+            pieChart = new Chart(pieCtx, {
                 type: 'doughnut',
-                data: { labels: names, datasets: [{ data: profits.map(p => Math.abs(p)), backgroundColor: colors, borderWidth: 3, borderColor: '#fff' }] },
-                options: { responsive: true, maintainAspectRatio: false }
+                data: { labels: crops.map(c => c.name), datasets: [{ data: crops.map(c => c.profitPerYear), backgroundColor: Object.values(colors).map(c => c.bg), borderColor: Object.values(colors).map(c => c.border), borderWidth: 2, hoverOffset: 10 }] },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '55%', plugins: { legend: { position: 'right', labels: { font: { family: 'Noto Sans Thai', size: 12 }, padding: 15, usePointStyle: true } }, tooltip: { callbacks: { label: function(context) { const total = context.dataset.data.reduce((a, b) => a + b, 0); const percentage = ((context.raw / total) * 100).toFixed(1); return `${context.label}: ฿${formatNumber(context.raw)} (${percentage}%)`; } } } } }
             });
-
-            charts.revenueCost = new Chart(document.getElementById('revenueCostChart'), {
-                type: 'bar',
-                data: { labels: names, datasets: [
-                    { label: 'รายได้', data: revenues, backgroundColor: '#3b82f6', borderRadius: 4 },
-                    { label: 'ต้นทุน', data: costs, backgroundColor: '#f59e0b', borderRadius: 4 }
-                ] },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { ticks: { callback: v => formatCurrency(v) } } } }
-            });
-
-            charts.profitLine = new Chart(document.getElementById('profitLineChart'), {
-                type: 'line',
-                data: { labels: names, datasets: [{ label: 'กำไร', data: profits, borderColor: '#10b981', backgroundColor: '#10b98120', fill: true, tension: 0.4 }] },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { ticks: { callback: v => formatCurrency(v) } } } }
-            });
-
-            charts.profitPerRai = new Chart(document.getElementById('profitPerRaiChart'), {
-                type: 'bar',
-                data: { labels: names, datasets: [{ label: 'กำไร/ไร่', data: profitPerRai, backgroundColor: colorRgba, borderColor: colors, borderWidth: 2, borderRadius: 8 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => formatCurrency(v) } } } }
-            });
-
-            charts.costPerRai = new Chart(document.getElementById('costPerRaiChart'), {
-                type: 'bar',
-                data: { labels: names, datasets: [{ label: 'ต้นทุน/ไร่', data: costPerRai, backgroundColor: colorRgba.map(c => c.replace('99', '60')), borderColor: colors, borderWidth: 2, borderRadius: 8 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => formatCurrency(v) } } } }
-            });
-
-            charts.radar = new Chart(document.getElementById('radarChart'), {
+            const radarCtx = document.getElementById('radarChart').getContext('2d');
+            const maxProfit = Math.max(...crops.map(c => c.profitPerYear));
+            const maxRate = Math.max(...crops.map(c => c.profitRate));
+            const maxYield = Math.max(...crops.map(c => (c.yieldMin + c.yieldMax) / 2));
+            const maxCycles = Math.max(...crops.map(c => c.cyclesPerYear));
+            const difficultyScores = { sugarcane: 75, corn: 85, rice: 70, cassava: 90 };
+            radarChart = new Chart(radarCtx, {
                 type: 'radar',
-                data: { labels: names, datasets: [
-                    { label: 'กำไร', data: profits.map(p => Math.abs(p)), borderColor: '#10b981', backgroundColor: '#10b98140', pointBackgroundColor: '#10b981' },
-                    { label: 'ROI', data: rois.map(r => Math.abs(r) * 1000), borderColor: '#f59e0b', backgroundColor: '#f59e0b40', pointBackgroundColor: '#f59e0b' }
-                ] },
-                options: { responsive: true, maintainAspectRatio: false }
+                data: {
+                    labels: ['กำไร/ไร่/ปี', '% กำไร', 'ผลผลิต/ไร่', 'รอบ/ปี', 'ความง่าย'],
+                    datasets: crops.map((crop, i) => ({ label: crop.name, data: [((crop.profitPerYear) / maxProfit * 100).toFixed(1), ((crop.profitRate) / maxRate * 100).toFixed(1), (((crop.yieldMin + crop.yieldMax) / 2) / maxYield * 100).toFixed(1), (crop.cyclesPerYear / maxCycles * 100).toFixed(1), difficultyScores[crop.id]], backgroundColor: Object.values(colors)[i].bg, borderColor: Object.values(colors)[i].border, borderWidth: 2, pointBackgroundColor: Object.values(colors)[i].border, pointRadius: 4, pointHoverRadius: 6 }))
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { r: { beginAtZero: true, max: 100, ticks: { stepSize: 20, font: { size: 10 } }, pointLabels: { font: { family: 'Noto Sans Thai', size: 11 } } } }, plugins: { legend: { position: 'bottom', labels: { font: { family: 'Noto Sans Thai', size: 11 }, padding: 10, usePointStyle: true } } } }
             });
-
-            charts.area = new Chart(document.getElementById('areaChart'), {
+            const lineCtx = document.getElementById('lineChart').getContext('2d');
+            const years = [1, 2, 3, 4, 5];
+            const cumulativeData = crops.map(crop => { const profitPerYear = crop.profitPerYear; const cost = crop.cost; return years.map(year => (profitPerYear * year) - cost); });
+            lineChart = new Chart(lineCtx, {
                 type: 'line',
-                data: { labels: names, datasets: [
-                    { label: 'รายได้', data: revenues, borderColor: '#3b82f6', backgroundColor: '#3b82f620', fill: true },
-                    { label: 'ต้นทุน', data: costs, borderColor: '#f59e0b', backgroundColor: '#f59e0b20', fill: true }
-                ] },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { ticks: { callback: v => formatCurrency(v) } } } }
+                data: { labels: years.map(y => `ปี ${y}`), datasets: crops.map((crop, i) => ({ label: crop.name, data: cumulativeData[i], backgroundColor: Object.values(colors)[i].bg.replace('0.8', '0.2'), borderColor: Object.values(colors)[i].border, borderWidth: 3, fill: true, tension: 0.4, pointRadius: 5, pointBackgroundColor: Object.values(colors)[i].border, pointBorderColor: '#fff', pointBorderWidth: 2, pointHoverRadius: 8 })) },
+                options: { responsive: true, maintainAspectRatio: false, interaction: { intersect: false, mode: 'index' }, scales: { y: { beginAtZero: true, ticks: { callback: function(value) { return '฿' + formatNumber(value); } }, title: { display: true, text: 'รายได้สะสม (บาท)', font: { family: 'Noto Sans Thai' } } }, x: { title: { display: true, text: 'ปี', font: { family: 'Noto Sans Thai' } } } }, plugins: { legend: { position: 'top', labels: { font: { family: 'Noto Sans Thai', size: 12 }, usePointStyle: true } }, tooltip: { callbacks: { label: function(context) { return `${context.dataset.label}: ฿${formatNumber(context.raw)}`; } } } } }
             });
+            const stackedCtx = document.getElementById('stackedBarChart').getContext('2d');
+            const costBreakdown = { sugarcane: { seed: 2500, fertilizer: 4000, labor: 4500, other: 2077 }, corn: { seed: 1200, fertilizer: 1500, labor: 1500, other: 683 }, rice: { seed: 800, fertilizer: 1800, labor: 2000, other: 686.5 }, cassava: { seed: 1500, fertilizer: 2000, labor: 2500, other: 710 } };
+            stackedBarChart = new Chart(stackedCtx, {
+                type: 'bar',
+                data: { labels: crops.map(c => c.name), datasets: [{ label: 'ค่าพันธุ์', data: crops.map(c => costBreakdown[c.id].seed), backgroundColor: 'rgba(239, 68, 68, 0.8)', borderColor: 'rgb(220, 38, 38)', borderWidth: 1, borderRadius: 4 }, { label: 'ค่าปุ๋ย', data: crops.map(c => costBreakdown[c.id].fertilizer), backgroundColor: 'rgba(251, 191, 36, 0.8)', borderColor: 'rgb(245, 158, 11)', borderWidth: 1, borderRadius: 4 }, { label: 'ค่าแรงงาน', data: crops.map(c => costBreakdown[c.id].labor), backgroundColor: 'rgba(59, 130, 246, 0.8)', borderColor: 'rgb(37, 99, 235)', borderWidth: 1, borderRadius: 4 }, { label: 'อื่นๆ', data: crops.map(c => costBreakdown[c.id].other), backgroundColor: 'rgba(139, 92, 246, 0.8)', borderColor: 'rgb(126, 34, 206)', borderWidth: 1, borderRadius: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true, title: { display: true, text: 'พืช', font: { family: 'Noto Sans Thai' } } }, y: { stacked: true, beginAtZero: true, ticks: { callback: function(value) { return '฿' + formatNumber(value); } }, title: { display: true, text: 'ต้นทุน (บาท)', font: { family: 'Noto Sans Thai' } } } }, plugins: { legend: { position: 'top', labels: { font: { family: 'Noto Sans Thai', size: 12 }, usePointStyle: true } }, tooltip: { callbacks: { label: function(context) { return `${context.dataset.label}: ฿${formatNumber(context.raw)}`; } } } } }
+            });
+            const polarCtx = document.getElementById('polarChart').getContext('2d');
+            const compositeScores = crops.map(crop => { const profitScore = ((crop.profitPerYear) / maxProfit * 100) * 0.35; const rateScore = ((crop.profitRate) / maxRate * 100) * 0.25; const yieldScore = ((crop.calcYield || crop.avgYield) / maxYield * 100) * 0.15; const cycleScore = (crop.cyclesPerYear / maxCycles * 100) * 0.15; const easeScore = difficultyScores[crop.id] * 0.10; return (profitScore + rateScore + yieldScore + cycleScore + easeScore).toFixed(1); });
+            polarChart = new Chart(polarCtx, { type: 'polarArea', data: { labels: crops.map(c => c.name), datasets: [{ data: compositeScores, backgroundColor: ['rgba(245, 158, 11, 0.6)', 'rgba(251, 191, 36, 0.6)', 'rgba(96, 165, 250, 0.6)', 'rgba(167, 139, 250, 0.6)'], borderColor: ['rgb(245, 158, 11)', 'rgb(251, 191, 36)', 'rgb(96, 165, 250)', 'rgb(167, 139, 250)'], borderWidth: 2 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { r: { beginAtZero: true, max: 100, ticks: { stepSize: 20, font: { size: 10 } } } }, plugins: { legend: { position: 'right', labels: { font: { family: 'Noto Sans Thai', size: 12 }, padding: 15, usePointStyle: true } }, tooltip: { callbacks: { label: function(context) { return `${context.label}: ${context.raw} คะแนน`; } } } } } });
         }
-
-        function resetData() {
-            crops = JSON.parse(JSON.stringify(defaultCrops));
-            document.getElementById('raiInput').value = 10;
-            recalculate();
+        function updateNewCharts() {
+            if (!pieChart) return;
+            const colors = { sugarcane: { bg: 'rgba(245, 158, 11, 0.8)', border: 'rgb(245, 158, 11)' }, corn: { bg: 'rgba(251, 191, 36, 0.8)', border: 'rgb(251, 191, 36)' }, rice: { bg: 'rgba(96, 165, 250, 0.8)', border: 'rgb(96, 165, 250)' }, cassava: { bg: 'rgba(167, 139, 250, 0.8)', border: 'rgb(167, 139, 250)' } };
+            pieChart.data.datasets[0].data = crops.map(c => c.calcProfitPerYear || c.profitPerYear);
+            pieChart.update();
+            const maxProfit = Math.max(...crops.map(c => c.calcProfitPerYear || c.profitPerYear));
+            const maxRate = Math.max(...crops.map(c => c.calcProfitRate || c.profitRate));
+            const maxYield = Math.max(...crops.map(c => c.calcYield || c.avgYield));
+            const maxCycles = Math.max(...crops.map(c => c.cyclesPerYear));
+            const difficultyScores = { sugarcane: 75, corn: 85, rice: 70, cassava: 90 };
+            radarChart.data.datasets = crops.map((crop, i) => ({ label: crop.name, data: [((crop.calcProfitPerYear || crop.profitPerYear) / maxProfit * 100).toFixed(1), ((crop.calcProfitRate || crop.profitRate) / maxRate * 100).toFixed(1), ((crop.calcYield || crop.avgYield) / maxYield * 100).toFixed(1), (crop.cyclesPerYear / maxCycles * 100).toFixed(1), difficultyScores[crop.id]], backgroundColor: Object.values(colors)[i].bg, borderColor: Object.values(colors)[i].border, borderWidth: 2, pointBackgroundColor: Object.values(colors)[i].border, pointRadius: 4, pointHoverRadius: 6 }));
+            radarChart.update();
+            const years = [1, 2, 3, 4, 5];
+            const cumulativeData = crops.map(crop => { const profitPerYear = crop.calcProfitPerYear || crop.profitPerYear; const cost = crop.calcCost || crop.cost; return years.map(year => (profitPerYear * year) - cost); });
+            lineChart.data.datasets = crops.map((crop, i) => ({ label: crop.name, data: cumulativeData[i], backgroundColor: Object.values(colors)[i].bg.replace('0.8', '0.2'), borderColor: Object.values(colors)[i].border, borderWidth: 3, fill: true, tension: 0.4, pointRadius: 5, pointBackgroundColor: Object.values(colors)[i].border, pointBorderColor: '#fff', pointBorderWidth: 2, pointHoverRadius: 8 }));
+            lineChart.update();
+            const compositeScores = crops.map(crop => { const profitScore = ((crop.calcProfitPerYear || crop.profitPerYear) / maxProfit * 100) * 0.35; const rateScore = ((crop.calcProfitRate || crop.profitRate) / maxRate * 100) * 0.25; const yieldScore = ((crop.calcYield || crop.avgYield) / maxYield * 100) * 0.15; const cycleScore = (crop.cyclesPerYear / maxCycles * 100) * 0.15; const easeScore = difficultyScores[crop.id] * 0.10; return (profitScore + rateScore + yieldScore + cycleScore + easeScore).toFixed(1); });
+            polarChart.data.datasets[0].data = compositeScores;
+            polarChart.update();
         }
-
-        // Initialize on load
-        window.onload = recalculate;
+        function getChartOptions(title) { return { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context) { if (title.includes('%')) { return context.parsed.y.toFixed(1) + '%'; } return '฿' + formatNumber(context.parsed.y); } } } }, scales: { y: { beginAtZero: true, ticks: { callback: function(value) { if (title.includes('%')) return value; return '฿' + formatNumber(value); } } } } }; }
+        function updateCharts() { profitChart.data.datasets[0].data = crops.map(c => c.calcProfitPerYear || c.profitPerYear); profitChart.update(); profitRateChart.data.datasets[0].data = crops.map(c => c.calcProfitRate || c.profitRate); profitRateChart.update(); costChart.data.datasets[0].data = crops.map(c => c.calcCost || c.cost); costChart.update(); yieldChart.data.datasets[0].data = crops.map(c => c.calcYield || c.avgYield); yieldChart.update(); ganttChart.data.datasets[1].data = crops.map(c => c.cyclesPerYear * 12); ganttChart.update(); }
+        function updateRecommendations() { const sortedByProfit = [...crops].sort((a, b) => (b.calcProfitPerYear || b.profitPerYear) - (a.calcProfitPerYear || a.profitPerYear)); const sortedByRate = [...crops].sort((a, b) => (b.calcProfitRate || b.profitRate) - (a.calcProfitRate || a.profitRate)); const container = document.getElementById('recommendationGrid'); const icons = { sugarcane: '🌿', corn: '🌽', rice: '🌾', cassava: '🥔' }; const topProfit = sortedByProfit[0]; const topRate = sortedByRate[0]; container.innerHTML = `<div class="rec-item"><div class="rec-rank">🥇</div><div class="rec-name">${icons[topProfit.id]} ${topProfit.name}</div><div class="rec-value">กำไรสูงสุด/ปี<br>฿${formatNumber(topProfit.calcProfitPerYear || topProfit.profitPerYear)}</div></div><div class="rec-item"><div class="rec-rank">📈</div><div class="rec-name">${icons[topRate.id]} ${topRate.name}</div><div class="rec-value">% กำไรสูงสุด<br>${(topRate.calcProfitRate || topRate.profitRate).toFixed(1)}%</div></div><div class="rec-item"><div class="rec-rank">💵</div><div class="rec-name">${icons[sortedByProfit[3].id]} ${sortedByProfit[3].name}</div><div class="rec-value">ต้นทุนต่ำสุด<br>฿${formatNumber(sortedByProfit[3].calcCost || sortedByProfit[3].cost)}</div></div><div class="rec-item"><div class="rec-rank">🌾</div><div class="rec-name">${icons[sortedByProfit[1].id]} ${sortedByProfit[1].name}</div><div class="rec-value">ทางเลือกที่ 2<br>฿${formatNumber(sortedByProfit[1].calcProfitPerYear || sortedByProfit[1].profitPerYear)}/ปี</div></div>`; }
+        function formatNumber(num) { return new Intl.NumberFormat('th-TH').format(Math.round(num)); }
+        window.addEventListener('DOMContentLoaded', init);
+        let modalChart = null; const modal = document.getElementById('chartModal'); const modalTitle = document.getElementById('modalTitle'); const modalCanvas = document.getElementById('modalChart');
+        function showModal(chartData, chartTitle, chartType) { modalTitle.textContent = chartTitle; if (modalChart) { modalChart.destroy(); } const ctx = modalCanvas.getContext('2d'); const baseOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: chartType === 'doughnut' || chartType === 'polarArea' ? 'right' : chartType === 'radar' ? 'bottom' : chartType === 'line' ? 'top' : 'none', labels: { font: { family: 'Noto Sans Thai', size: 13 }, padding: 15, usePointStyle: true } }, tooltip: { callbacks: { label: function(context) { if (chartTitle.includes('%')) { return context.parsed.y?.toFixed(1) + '%' || context.parsed.toFixed(1) + '%'; } if (chartTitle.includes('5 ปี') || chartTitle.includes('กำไร')) { return '฿' + formatNumber(context.parsed.y || context.parsed); } return '฿' + formatNumber(context.parsed.y || context.parsed); } } } } }; const radarOptions = { responsive: true, maintainAspectRatio: false, scales: { r: { beginAtZero: true, max: 100, ticks: { stepSize: 20, font: { size: 11 } }, pointLabels: { font: { family: 'Noto Sans Thai', size: 12 } } } }, plugins: { legend: { position: 'bottom', labels: { font: { family: 'Noto Sans Thai', size: 12 }, padding: 10, usePointStyle: true } } } }; const lineOptions = { responsive: true, maintainAspectRatio: false, interaction: { intersect: false, mode: 'index' }, scales: { y: { beginAtZero: true, ticks: { callback: value => '฿' + formatNumber(value) }, title: { display: true, text: 'รายได้สะสม (บาท)', font: { family: 'Noto Sans Thai' } } }, x: { title: { display: true, text: 'ปี', font: { family: 'Noto Sans Thai' } } } }, plugins: { legend: { position: 'top', labels: { font: { family: 'Noto Sans Thai', size: 12 }, usePointStyle: true } }, tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ฿${formatNumber(ctx.raw)}` } } } }; const pieOptions = { responsive: true, maintainAspectRatio: false, cutout: '55%', plugins: { legend: { position: 'right', labels: { font: { family: 'Noto Sans Thai', size: 13 }, padding: 15, usePointStyle: true } }, tooltip: { callbacks: { label: function(context) { const total = context.dataset.data.reduce((a, b) => a + b, 0); const percentage = ((context.raw / total) * 100).toFixed(1); return `${context.label}: ฿${formatNumber(context.raw)} (${percentage}%)`; } } } } }; const stackedOptions = { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true, title: { display: true, text: 'พืช', font: { family: 'Noto Sans Thai' } } }, y: { stacked: true, beginAtZero: true, ticks: { callback: value => '฿' + formatNumber(value) }, title: { display: true, text: 'ต้นทุน (บาท)', font: { family: 'Noto Sans Thai' } } } }, plugins: { legend: { position: 'top', labels: { font: { family: 'Noto Sans Thai', size: 12 }, usePointStyle: true } }, tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ฿${formatNumber(ctx.raw)}` } } } }; const polarOptions = { responsive: true, maintainAspectRatio: false, scales: { r: { beginAtZero: true, max: 100, ticks: { stepSize: 20, font: { size: 10 } } } }, plugins: { legend: { position: 'right', labels: { font: { family: 'Noto Sans Thai', size: 12 }, padding: 15, usePointStyle: true } }, tooltip: { callbacks: { label: ctx => `${ctx.label}: ${ctx.raw} คะแนน` } } } }; let options = { ...baseOptions }; if (chartType === 'radar') options = radarOptions; else if (chartType === 'line') options = lineOptions; else if (chartType === 'doughnut') options = pieOptions; else if (chartType === 'bar' && chartTitle.includes('ต้นทุนแยก')) options = stackedOptions; else if (chartType === 'polarArea') options = polarOptions; else { options.scales = { y: { beginAtZero: true, ticks: { callback: value => chartTitle.includes('%') ? value : '฿' + formatNumber(value) } } }; } modalChart = new Chart(ctx, { type: chartType, data: chartData, options: options }); modal.classList.add('active'); document.body.style.overflow = 'hidden'; }
+        function closeModal() { modal.classList.remove('active'); document.body.style.overflow = ''; setTimeout(() => { if (modalChart) { modalChart.destroy(); modalChart = null; } }, 300); }
+        modal.addEventListener('click', (e) => { if (e.target === modal) { closeModal(); } });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.classList.contains('active')) { closeModal(); } });
+        function addChartClickHandlers() { const chartConfigs = [{ chart: profitChart, title: '📊 กำไรต่อไร่ต่อปี (บาท)', type: 'bar' }, { chart: profitRateChart, title: '📈 อัตรากำไร (%)', type: 'bar' }, { chart: costChart, title: '💰 ต้นทุนต่อไร่ (บาท)', type: 'bar' }, { chart: yieldChart, title: '🌱 ผลผลิตต่อรอบ (ตัน/ไร่)', type: 'bar' }, { chart: ganttChart, title: '📅 รอบปลูกและจำนวนรอบต่อปี', type: 'bar' }, { chart: pieChart, title: '🍩 สัดส่วนกำไรรวมต่อปี', type: 'doughnut' }, { chart: radarChart, title: '🕸️ เปรียบเทียบหลายมิติ', type: 'radar' }, { chart: lineChart, title: '📈 รายได้สะสม 5 ปี', type: 'line' }, { chart: stackedBarChart, title: '📊 ต้นทุนแยกประเภท', type: 'bar' }, { chart: polarChart, title: '🎯 คะแนนรวม', type: 'polarArea' }]; chartConfigs.forEach(config => { if (config.chart && config.chart.canvas) { config.chart.canvas.onclick = () => { showModal(JSON.parse(JSON.stringify(config.chart.data)), config.title, config.type); }; } }); }
     </script>
 </body>
 </html>
